@@ -1,0 +1,92 @@
+﻿@{
+    Page.Title = "Edit Item";
+    
+    int FirstId = UrlData[0].AsInt();
+    int SecondId = UrlData[1].AsInt();
+    int ThirdId = UrlData[2].AsInt();
+    var Quantity = "";
+    int Measurement = 0;
+    int Ingredient = 0;
+    dynamic Measurements = "";
+    dynamic Ingredients = "";
+    var FormTitle = "";
+
+    if (ThirdId == 0) {
+        FormTitle = "Add Item";
+    }
+    else {
+        FormTitle = "Edit Item";
+    }
+
+    if (IsPost && (UrlData.Count == 3)) {
+        Validation.RequireField("Quantity", "Item Quantity is required.");
+        Quantity = Request.Form["Quantity"];
+        Measurement = Request.Form["Measurement"].AsInt();
+        Ingredient = Request.Form["Ingredient"].AsInt();
+        if (Validation.IsValid()) {
+            if (ThirdId == 0) {
+                var db = Database.Open("MyRecipes");
+                var insertQueryString = "INSERT INTO Items (Quantity, FkMeasurements, FkIngredients, FkItemGroups) VALUES (@0, @1, @2, @3)";
+                db.Execute(insertQueryString, Quantity, Measurement, Ingredient, SecondId);
+                Response.Redirect(@Href("~/Members/EditRecipeDetail/" + FirstId));
+            }
+            else {
+                var db = Database.Open("MyRecipes");
+                var updateQueryString = "UPDATE Items SET Quantity=@0, FkMeasurements=@1, FkIngredients=@2 WHERE Id=@3";
+                db.Execute(updateQueryString, Quantity, Measurement, Ingredient, ThirdId);
+                Response.Redirect(@Href("~/Members/EditRecipeDetail/" + FirstId));
+            }
+        }
+    }
+    else if (UrlData.Count == 3) {
+        var db = Database.Open("MyRecipes");
+        var selectQueryString = "SELECT * FROM Measurements";
+        Measurements = db.Query(selectQueryString).ToList();
+
+        selectQueryString = "SELECT * FROM Ingredients";
+        Ingredients = db.Query(selectQueryString).ToList();
+
+        if (ThirdId != 0) {
+            selectQueryString = "SELECT * FROM Items WHERE Id=@0";
+            var returnedResult = db.QuerySingle(selectQueryString, ThirdId);
+            Quantity = returnedResult.Quantity;
+            Measurement = returnedResult.FkMeasurements;
+            Ingredient = returnedResult.FkIngredients;
+        }
+        else {
+            Quantity = "";
+        }
+    }
+    else {
+        Response.Redirect(@Href("~/"));
+    }
+
+}
+
+        <form method="post" class="form-horizontal">
+            <fieldset>
+                <legend>@FormTitle</legend>
+                <div class="form-group">
+                    <label for="select" class="col-lg-2 control-label">Item Amount:</label>
+                    <div class="col-lg-10">
+                        <input type="text" class="form-control" id="Quantity" name="Quantity" value="@Quantity" style="cursor: auto;">
+                        <select class="form-control" id="Measurement" name="Measurement">
+                        @foreach (var i in Measurements) {
+                            <option value="@i.Id"@if (i.Id == Measurement) { <text>selected</text> }>@i.Description</option>
+                        }
+                        </select>
+                        <select class="form-control" id="Ingredient" name="Ingredient">
+                        @foreach (var i in Ingredients) {
+                            <option value="@i.Id"@if (i.Id == Ingredient) { <text>selected</text> }>@i.Description</option>
+                        }
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-lg-10 col-lg-offset-2">
+                        <a href="~/Members/EditRecipeDetail/@FirstId" class="btn btn-default">Cancel</a>
+                        <input type="submit" value="Submit" class="btn btn-primary" />
+                    </div>
+                </div>
+            </fieldset>
+        </form>

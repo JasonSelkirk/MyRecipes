@@ -1,0 +1,17 @@
+﻿@{
+    Page.Title = "Recipe List";
+
+    var db = Database.Open("MyRecipes");
+    var items = db.Query("SELECT * FROM Ingredients order by Description ASC").ToList();
+}
+
+        <h1 class="text-center">Ingredient List</h1>
+        <a href="~/Members/EditIngredient/0" title="Add Ingredient" class="btn btn-success">Add Ingredient</a>
+        <ul class="list-group">
+            @foreach (var i in items) {
+                <li class="list-group-item">
+                    <span class="badge"><a href="~/Members/EditIngredient/@i.Id" title="Edit @i.Description">Edit</a></span>
+                    @i.Description
+                </li>
+            }
+        </ul>

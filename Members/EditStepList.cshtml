@@ -1,0 +1,66 @@
+﻿@{
+    Page.Title = "Edit Step List";
+    
+    int FirstId = UrlData[0].AsInt();
+    int SecondId = UrlData[1].AsInt();
+    var Description = "";
+    string FormTitle = "";
+
+    if (SecondId == 0) {
+        FormTitle = "Add Step List";
+    }
+    else {
+        FormTitle = "Edit Step List";
+    }
+
+    if (IsPost && (UrlData.Count == 2)) {
+        Validation.RequireField("Description", "Step List Name is required.");
+        Description = Request.Form["Description"];
+        if (Validation.IsValid()) {
+            if (SecondId == 0) {
+                var db = Database.Open("MyRecipes");
+                var insertQueryString = "INSERT INTO StepLists (Description, FkRecipes) VALUES (@0, @1)";
+                db.Execute(insertQueryString, Description, FirstId);
+                Response.Redirect(@Href("~/Members/EditRecipeDetail/" + FirstId));
+            }
+            else {
+                var db = Database.Open("MyRecipes");
+                var updateQueryString = "UPDATE StepLists SET Description=@0 WHERE Id=@1";
+                db.Execute(updateQueryString, Description, SecondId);
+                Response.Redirect(@Href("~/Members/EditRecipeDetail/" + FirstId));
+            }
+        }
+    }
+    else if (UrlData.Count == 2) {
+        if (SecondId != 0) {
+            var db = Database.Open("MyRecipes");
+            var selectQueryString = "SELECT * FROM StepLists WHERE Id=@0";
+            var returnedResult = db.QuerySingle(selectQueryString, SecondId);
+            Description = returnedResult.Description;
+        }
+        else {
+            Description = "";
+        }
+    }
+    else {
+        Response.Redirect(@Href("~/"));
+    }
+}
+
+        <form method="post" class="form-horizontal">
+          <fieldset>
+            <legend>@FormTitle</legend>
+            <div class="form-group">
+              <label for="Description" class="col-lg-2 control-label">Step List Name:</label>
+              <div class="col-lg-10">
+                <input type="text" class="form-control" id="Description" name="Description" value="@Description" style="cursor: auto;">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-lg-10 col-lg-offset-2">
+                <a href="~/Members/EditRecipeDetail/@FirstId" class="btn btn-default">Cancel</a>
+                <input type="submit" value="Submit" class="btn btn-primary" />
+              </div>
+            </div>
+          </fieldset>
+        </form>

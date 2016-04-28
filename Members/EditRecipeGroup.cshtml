@@ -1,0 +1,68 @@
+﻿@{
+    Page.Title = "Edit Recipe Group";
+    
+    int FirstId = UrlData[0].AsInt();
+    int SecondId = UrlData[1].AsInt();
+    int ThirdId = UrlData[2].AsInt();
+    var Description = "";
+    string FormTitle = "";
+    
+    if (ThirdId == 0) {
+        FormTitle = "Add Recipe Group";
+    }
+    else {
+        FormTitle = "Edit Recipe Group";
+    }
+
+
+    if (IsPost && (UrlData.Count == 3)) {
+        Validation.RequireField("RecipeGroupName", "Recipe Group Name is required.");
+        Description = Request.Form["Description"];
+        if (Validation.IsValid()) {
+            if (ThirdId == 0) {
+                var db = Database.Open("MyRecipes");
+                var insertQueryString = "INSERT INTO RecipeGroups (Description, FkRecipeLists) VALUES (@0, @1)";
+                db.Execute(insertQueryString, Description, SecondId);
+                Response.Redirect(@Href("~/ViewRecipeGroups/"));
+            }
+            else {
+                var db = Database.Open("MyRecipes");
+                var updateQueryString = "UPDATE RecipeGroups SET Description=@0 WHERE Id=@1";
+                db.Execute(updateQueryString, Description, ThirdId);
+                Response.Redirect(@Href("~/ViewRecipeGroups"));
+            }
+        }
+    }
+    else if (UrlData.Count == 3) {
+        if (ThirdId != 0) {
+            var db = Database.Open("MyRecipes");
+            var selectQueryString = "SELECT * FROM RecipeGroups WHERE Id=@0";
+            var returnedResult = db.QuerySingle(selectQueryString, ThirdId);
+            Description = returnedResult.Description;
+        }
+        else {
+            Description = "";
+        }
+    }
+    else {
+        Response.Redirect(@Href("~/"));
+    }
+}
+
+        <form method="post" class="form-horizontal">
+          <fieldset>
+            <legend>@FormTitle</legend>
+            <div class="form-group">
+              <label for="Description" class="col-lg-2 control-label">Recipe Group Name:</label>
+              <div class="col-lg-10">
+                <input type="text" class="form-control" id="Description" name="Description" value="@Description" style="cursor: auto;">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-lg-10 col-lg-offset-2">
+                <a href="~/" class="btn btn-default">Cancel</a>
+                <input type="submit" value="Submit" class="btn btn-primary" />
+              </div>
+            </div>
+          </fieldset>
+        </form>

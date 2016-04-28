@@ -1,0 +1,53 @@
+﻿@{
+    var username = "";
+    var password = "";
+    var errorMessage = "";
+   
+    if(IsPost){
+        username = Request["username"];
+        password = Request["password"];
+        if(WebSecurity.Login(username,password,true)){
+            Response.Redirect("~/");
+        }
+        else
+        {
+            errorMessage = "Login was not successful.";
+        }
+    }
+}
+        <form method="post" class="form-horizontal">
+          <fieldset>
+                          @if(WebSecurity.IsAuthenticated){
+                <p>You are currently logged in as @WebSecurity.CurrentUserName.
+                  <a href="@Href("~/Logout")">Log out</a>
+                </p>
+            }
+            <legend>Login</legend>
+            <div class="form-group">
+              <label for="username" class="col-lg-2 control-label">User Name:</label>
+              <div class="col-lg-10">
+                <input type="text" class="form-control" id="username" name="username" value="" style="cursor: auto;">
+              </div>
+            </div>
+              <div class="form-group">
+              <label for="password" class="col-lg-2 control-label">Password:</label>
+              <div class="col-lg-10">
+                <input type="password" class="form-control" id="password" name="password" value="" style="cursor: auto;">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-lg-10 col-lg-offset-2">
+                <a href="~/" class="btn btn-default">Return Home</a>
+                <input type="submit" value="Submit" class="btn btn-primary" />
+              </div>
+                <div class="col-lg-10 col-lg-offset-2">
+                    <p>No user name? <a href="@Href("~/Register")">Register</a></p>
+                </div>
+            </div>
+          </fieldset>
+        </form>
+        <p>
+            @if(errorMessage != ""){
+                <span class="errorMessage">@errorMessage</span>
+            }
+        </p>

@@ -1,0 +1,67 @@
+﻿@{
+    Page.Title = "Edit Measurement";
+    
+    int FirstId = UrlData[0].AsInt();
+    var Description = "";
+    string FormTitle = "";
+
+    if (FirstId == 0) {
+        FormTitle = "Add Measurement";
+    }
+    else {
+        FormTitle = "Edit Measurement";
+    }
+
+    if (IsPost && (UrlData.Count == 1)) {
+        Validation.RequireField("Description", "Measurement Name is required.");
+        Description = Request.Form["Description"];
+        if (Validation.IsValid()) {
+            if (FirstId == 0) {
+                var db = Database.Open("MyRecipes");
+                var insertQueryString = "INSERT INTO Measurements (Description) VALUES (@0)";
+                db.Execute(insertQueryString, Description);
+                Response.Redirect(@Href("~/ViewMeasurements/"));
+            }
+            else {
+                var db = Database.Open("MyRecipes");
+                var updateQueryString = "UPDATE Measurements SET Description=@0 WHERE Id=@1";
+                db.Execute(updateQueryString, Description, FirstId);
+                Response.Redirect(@Href("~/ViewMeasurements/"));
+            }
+        }
+    }
+    else if (UrlData.Count == 1) {
+        if (FirstId != 0) {
+            var db = Database.Open("MyRecipes");
+            var selectQueryString = "SELECT * FROM Measurements WHERE Id=@0";
+            var returnedResult = db.QuerySingle(selectQueryString, FirstId);
+            Description = returnedResult.Description;
+        }
+        else {
+            Description = "";
+        }
+    }
+    else {
+        Response.Redirect(@Href("~/"));
+    }
+}
+
+
+
+        <form method="post" class="form-horizontal">
+          <fieldset>
+            <legend>@FormTitle</legend>
+            <div class="form-group">
+              <label for="Description" class="col-lg-2 control-label">Measurement Name:</label>
+              <div class="col-lg-10">
+                <input type="text" class="form-control" id="Description" name="Description" value="@Description" style="cursor: auto;">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-lg-10 col-lg-offset-2">
+                <a href="~/ViewMeasurements/" class="btn btn-default">Cancel</a>
+                <input type="submit" value="Submit" class="btn btn-primary" />
+              </div>
+            </div>
+          </fieldset>
+        </form>

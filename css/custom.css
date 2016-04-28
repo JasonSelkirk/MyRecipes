@@ -1,0 +1,59 @@
+body {
+    height: 100%;
+}
+.align-bottom {
+    vertical-align: bottom;
+}
+.total-max {
+    max-width: 1024px;
+}
+.medium-max {
+    max-width: 462px;
+}
+.home-button {
+    max-width: 462px;
+    margin: auto;
+}
+
+.jasontron {
+  padding: 30px 15px;
+  margin-bottom: 30px;
+  color: inherit;
+  background-color: #1c1e22;
+}
+.jasontron h1,
+.jasontron .h1 {
+  color: inherit;
+}
+.jasontron p {
+  margin-bottom: 15px;
+  font-size: 21px;
+  font-weight: 200;
+}
+.jasontron > hr {
+  border-top-color: #050506;
+}
+.container .jasontron,
+.container-fluid .jasontron {
+  border-radius: 6px;
+}
+.jasontron .container {
+  max-width: 100%;
+}
+
+@media all {
+	.page-break	{ display: none; }
+}
+
+@media print {
+    body {
+        color: #000;
+        background: #fff;
+    }
+    nav, footer {
+        display: none;
+    }
+	.page-break	{ display: block; page-break-before: always; }
+    .jasontron {border: none;}
+    .list-group-item {border: none;}
+}

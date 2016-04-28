@@ -1,0 +1,19 @@
+﻿@{
+    Page.Title = "Recipe List";
+
+    var db = Database.Open("MyRecipes");
+    var items = db.Query("SELECT * FROM Recipes").ToList();
+}
+
+        <h1 class="text-center">Recipe List</h1>
+        <a href="~/Members/EditRecipe/0" title="Add Recipe" class="btn btn-success">Add Recipe</a>
+        <ul class="list-group">
+            @foreach (var i in items) {
+                <li class="list-group-item">
+                    @if (WebSecurity.IsAuthenticated) {
+                        <span class="badge"><a href="~/Members/EditRecipe/@i.Id" title="Edit @i.Description">Edit</a></span>
+                    }
+                    <a href="~/ViewRecipeDetail/@i.Id" title="View @i.Description">@i.Description</a>
+                </li>
+            }
+        </ul>

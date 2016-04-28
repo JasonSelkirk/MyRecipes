@@ -1,0 +1,106 @@
+﻿@{
+    var FirstId  = UrlData[0];
+    if (FirstId.IsEmpty()) {
+         Response.Redirect("~/ViewRecipes");
+    }
+
+    var db = Database.Open("MyRecipes");
+   
+    var selectQueryString = "SELECT * FROM Recipes WHERE Id=@0";
+    var row = db.QuerySingle(selectQueryString, FirstId);
+    var RecipeName = row.Description;
+
+    selectQueryString = "SELECT * FROM ItemLists WHERE FkRecipes=@0";
+    dynamic ItemLists = db.Query(selectQueryString, FirstId).ToList();
+
+    selectQueryString = "SELECT * FROM StepLists WHERE FkRecipes=@0";
+    dynamic StepLists = db.Query(selectQueryString, FirstId).ToList();
+
+    Page.Title = RecipeName;
+}
+
+        <div class="row">
+            <div class="col-lg-12">
+                <span class="badge"><a href="~/ViewRecipeDetail/@FirstId" title="View @RecipeName">View</a></span>
+                <h2>@RecipeName</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Ingredients</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <a href="~/Members/EditItemList/@FirstId/0" title="Add Item List" class="btn btn-success">Add Item List</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <ul class="list-group">        
+                    @if (ItemLists.Count > 0) {
+                        foreach (var i in ItemLists) {
+                            selectQueryString = "SELECT * FROM ItemGroups WHERE FkItemLists=" + i.Id;
+                            var ItemGroups = db.Query(selectQueryString).ToList();
+                            <li class="list-group-item list-group-item-info">
+                                <span class="badge"><a href="~/Members/EditItemGroup/@FirstId/@i.Id/0" title="Add Item Group">Add Item Group</a></span>
+                                <a href="~/Members/EditItemList/@FirstId/@i.Id" title="Edit @i.Description">@i.Description</a>
+                            </li>
+                            foreach (var j in ItemGroups) {
+                                selectQueryString = "Select Items.Id, Items.Quantity, Measurements.Description as Measurement, Ingredients.Description as Ingredient from Items inner join Measurements on Items.FkMeasurements = Measurements.Id inner join Ingredients on Items.FkIngredients = Ingredients.Id WHERE Items.FkItemGroups=" + j.Id;
+                                var Items = db.Query(selectQueryString).ToList();
+                                <li class="list-group-item list-group-item-warning">
+                                    <span class="badge"><a href="~/Members/EditItem/@FirstId/@j.Id/0" title="Add Item">Add Item</a></span>
+                                    <a href="~/Members/EditItemGroup/@FirstId/@i.Id/@j.Id" title="Edit @j.Description">@j.Description</a>
+                                </li>
+                                foreach (var k in Items) {
+                                    <li class="list-group-item list-group-item-danger">
+                                        <a href="~/Members/EditItem/@FirstId/@j.Id/@k.Id" title="Edit @k.Quantity@k.Measurement @k.Ingredient">@k.Quantity@k.Measurement @k.Ingredient</a>
+                                    </li>
+                                }
+                            }
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Method</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <a href="~/Members/EditStepList/@FirstId/0" title="Add Step List" class="btn btn-success">Add Step List</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <ul class="list-group">
+                    @if (StepLists.Count > 0) {
+                        foreach (var i in StepLists) {
+                            selectQueryString = "SELECT * FROM StepGroups WHERE FkStepLists=" + i.Id;
+                            var StepGroups = db.Query(selectQueryString).ToList();
+                            <li class="list-group-item list-group-item-info">
+                                <span class="badge"><a href="~/Members/EditStepGroup/@FirstId/@i.Id/0" title="Add Step Group">Add Step Group</a></span>
+                                    <a href="~/Members/EditStepList/@FirstId/@i.Id" title="Edit @i.Description">@i.Description</a>
+                            </li>
+                            foreach (var j in StepGroups) {
+                                selectQueryString = "SELECT * FROM Steps WHERE FkStepGroups=" + j.Id;
+                                var Steps = db.Query(selectQueryString).ToList();
+                                <li class="list-group-item list-group-item-warning">
+                                    <span class="badge"><a href="~/Members/EditStep/@FirstId/@j.Id/0" title="Add Step">Add Step</a></span>
+                                    <a href="~/Members/EditStepGroup/@FirstId/@i.Id/@j.Id" title="Edit @j.Description">@j.Description</a>
+                                </li>
+                                foreach (var k in Steps) {
+                                    <li class="list-group-item list-group-item-danger">
+                                        <a href="~/Members/EditStep/@FirstId/@j.Id/@k.Id" title="Edit @k.Description">@k.Description</a>
+                                    </li>
+                                }
+                            }
+                        }
+                    }
+                </ul>
+            </div>
+        </div>

@@ -1,0 +1,90 @@
+﻿@{
+    var FirstId  = UrlData[0];
+    if (FirstId.IsEmpty()) {
+         Response.Redirect("~/ViewRecipes");
+    }
+
+    var db = Database.Open("MyRecipes");
+   
+    var selectQueryString = "SELECT * FROM Recipes WHERE Id=@0";
+    var row = db.QuerySingle(selectQueryString, FirstId);
+    var RecipeName = row.Description;
+
+    selectQueryString = "SELECT * FROM ItemLists WHERE FkRecipes=@0";
+    dynamic ItemLists = db.Query(selectQueryString, FirstId).ToList();
+
+    selectQueryString = "SELECT * FROM StepLists WHERE FkRecipes=@0";
+    dynamic StepLists = db.Query(selectQueryString, FirstId).ToList();
+
+    Page.Title = RecipeName;
+}
+
+        <div>
+            <div>
+                @if (WebSecurity.IsAuthenticated) {
+                    <span class="badge hidden-print"><a href="~/Members/EditRecipeDetail/@FirstId" title="Edit @RecipeName">Edit</a></span>
+                }
+                <h2>@RecipeName</h2>
+            </div>
+        </div>
+         <div>
+            <div>
+                <h3>Ingredients</h3>
+            </div>
+        </div>
+        <div>
+            <div class="medium-max">
+                <ul class="list-group">
+                    @if (ItemLists.Count > 0) {
+                        foreach (var i in ItemLists) {
+                            selectQueryString = "SELECT * FROM ItemGroups WHERE FkItemLists=" + i.Id;
+                            var ItemGroups = db.Query(selectQueryString).ToList();
+                            if (ItemLists.Count > 1){
+                                <li class="list-group-item">@i.Description</li>
+                            }
+                            foreach (var j in ItemGroups) {
+                                selectQueryString = "Select Items.Id, Items.Quantity, Measurements.Description as Measurement, Ingredients.Description as Ingredient from Items inner join Measurements on Items.FkMeasurements = Measurements.Id inner join Ingredients on Items.FkIngredients = Ingredients.Id WHERE Items.FkItemGroups=" + j.Id;
+                                var Items = db.Query(selectQueryString).ToList();
+                                if (ItemGroups.Count > 1){
+                                    <li class="list-group-item active">@j.Description</li>
+                                }
+                                    foreach (var k in Items) {
+                                        <li class="list-group-item">@k.Quantity@k.Measurement @k.Ingredient</li>
+                                }
+                            }
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+        <div class="page-break"></div>
+        <div>
+            <div>
+                <h3>Method</h3>
+            </div>
+        </div>
+        <div>
+            <div>
+	            <ul class="list-group">
+                    @if (StepLists.Count > 0) {
+                        foreach (var i in StepLists) {
+                            selectQueryString = "SELECT * FROM StepGroups WHERE FkStepLists=" + i.Id;
+                            var StepGroups = db.Query(selectQueryString).ToList();
+                            if (StepLists.Count > 1) {
+                                <li class="list-group-item">@i.Description</li>
+                            }
+                            foreach (var j in StepGroups) {
+                                selectQueryString = "SELECT * FROM Steps WHERE FkStepGroups=" + j.Id;
+                                var Steps = db.Query(selectQueryString).ToList();
+                                if (StepGroups.Count > 1) {
+                                    <li class="list-group-item">@j.Description</li>
+                                }
+                                foreach (var k in Steps) {
+                                    <li class="list-group-item">@k.Description</li>
+                                }
+                            }
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
